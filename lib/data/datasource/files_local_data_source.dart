@@ -11,15 +11,7 @@ class FilesLocalDataSource implements LocalDataSource {
   @override
   Future savePhotos(List<Photo> items) async {
     print("Saving to local storage file");
-    String path = await _docPath();
-
-    File file = File("$path/$_fileName");
-
-    if (await file.exists() == false) {
-      await file.create();
-    }
-    print("savePhotos: ${file.path}");
-    return await file.writeAsString(jsonEncode(items));
+    return await _writeTofile(items.map((e) => Map<String, dynamic>.from(e.toJson())).toList());
   }
 
   @override
@@ -57,7 +49,6 @@ class FilesLocalDataSource implements LocalDataSource {
     return;
   }
 
-
   Future<List<Map<String, dynamic>>> _getPhotosFromFile() async {
     String path = await _docPath();
     File file = File("$path/$_fileName");
@@ -69,6 +60,11 @@ class FilesLocalDataSource implements LocalDataSource {
   Future<void> _writeTofile(List<Map<String, dynamic>> list) async {
     String path = await _docPath();
     File file = File("$path/$_fileName");
+
+    if (await file.exists() == false) {
+      await file.create();
+    }
+
     await file.writeAsString(jsonEncode(list));
     return;
   }
