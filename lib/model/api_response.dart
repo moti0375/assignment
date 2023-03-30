@@ -7,7 +7,7 @@ part 'api_response.g.dart';
 class ApiResponse {
   List<Photo> photos;
 
-  ApiResponse({@required this.photos});
+  ApiResponse({required this.photos});
 
 
   factory ApiResponse.fromJson(Map<String, dynamic> json) => _$ApiResponseFromJson(json);
