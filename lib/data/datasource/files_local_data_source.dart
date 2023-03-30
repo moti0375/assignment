@@ -8,8 +8,6 @@ import 'package:path_provider/path_provider.dart';
 class FilesLocalDataSource implements LocalDataSource {
   final String _fileName = "local_cache.json";
 
-  List<Photo> _localCache = [];
-
   @override
   Future savePhotos(List<Photo> items) async {
     print("Saving to local storage file");
