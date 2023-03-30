@@ -39,13 +39,11 @@ class FilesLocalDataSource implements LocalDataSource {
   @override
   Future<void> removePhoto(Photo photo) async {
 
-    List<Map<String, dynamic>> list = await _getPhotosFromFile();
-
-    print("temp: ${list}");
-    Map<String, dynamic> p = list.firstWhere((element) => element['id'] == photo.id);
-    int pIndex = list.indexOf(p);
-    list.removeAt(pIndex);
-    await _writeTofile(list);
+    List<Map<String, dynamic>> photos = await _getPhotosFromFile();
+    Map<String, dynamic> ph = photos.firstWhere((element) => element['id'] == photo.id);
+    int pIndex = photos.indexOf(ph);
+    photos.removeAt(pIndex);
+    await _writeTofile(photos);
     return;
   }
 
@@ -53,17 +51,11 @@ class FilesLocalDataSource implements LocalDataSource {
   Future<void> updatePhoto(Photo photo) async {
     print("updatePhoto about to update photo: $photo");
 
-    List<Map<String, dynamic>> list = await _getPhotosFromFile();
-    print("temp: ${list}");
-    Map<String, dynamic> p = list.firstWhere((element) => element['id'] == photo.id);
-    int pIndex = list.indexOf(p);
-    print("updatePhoto: item to replace $p, index: $pIndex");
-
-    list[pIndex] = photo.toJson();
-
-    print("Updated photo: ${list[2]["title"]}");
-    //Photo p = photos.firstWhere((element) => element.id == photo.id);
-    await _writeTofile(list);
+    List<Map<String, dynamic>> photos = await _getPhotosFromFile();
+    Map<String, dynamic> ph = photos.firstWhere((element) => element['id'] == photo.id);
+    int pIndex = photos.indexOf(ph);
+    photos[pIndex] = photo.toJson();
+    await _writeTofile(photos);
     return;
   }
 
@@ -86,7 +78,6 @@ class FilesLocalDataSource implements LocalDataSource {
   Future<String> _docPath() async {
     Directory directory = await getApplicationSupportDirectory();
     String docPath = directory.path;
-    print("_docPath: $docPath");
     return docPath;
   }
 }
