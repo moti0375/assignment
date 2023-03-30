@@ -1,4 +1,4 @@
-# moti_assignment
+# flutter assignment
 
 A new Flutter project.
 
