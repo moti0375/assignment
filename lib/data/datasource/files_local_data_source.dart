@@ -29,7 +29,7 @@ class FilesLocalDataSource implements LocalDataSource {
   @override
   Future<void> removePhoto(Photo photo) async {
 
-    List<Map<String, dynamic>> photos = await _getPhotosFromFile();
+    List<Map<String, dynamic>> photos = await _readFromFile();
     Map<String, dynamic> ph = photos.firstWhere((element) => element['id'] == photo.id);
     int pIndex = photos.indexOf(ph);
     photos.removeAt(pIndex);
@@ -41,20 +41,12 @@ class FilesLocalDataSource implements LocalDataSource {
   Future<void> updatePhoto(Photo photo) async {
     print("updatePhoto about to update photo: $photo");
 
-    List<Map<String, dynamic>> photos = await _getPhotosFromFile();
+    List<Map<String, dynamic>> photos = await _readFromFile();
     Map<String, dynamic> ph = photos.firstWhere((element) => element['id'] == photo.id);
     int pIndex = photos.indexOf(ph);
     photos[pIndex] = photo.toJson();
     await _writeTofile(photos);
     return;
-  }
-
-  Future<List<Map<String, dynamic>>> _getPhotosFromFile() async {
-    String path = await _docPath();
-    File file = File("$path/$_fileName");
-    String content = await file.readAsString();
-    List<Map<String, dynamic>> list = (json.decode(content) as List).map((e) => Map<String,dynamic>.of(e)).toList();
-    return list;
   }
 
   Future<void> _writeTofile(List<Map<String, dynamic>> list) async {
@@ -67,6 +59,14 @@ class FilesLocalDataSource implements LocalDataSource {
 
     await file.writeAsString(jsonEncode(list));
     return;
+  }
+
+  Future<List<Map<String, dynamic>>> _readFromFile() async {
+    String path = await _docPath();
+    File file = File("$path/$_fileName");
+    String content = await file.readAsString();
+    List<Map<String, dynamic>> list = (json.decode(content) as List).map((e) => Map<String,dynamic>.of(e)).toList();
+    return list;
   }
 
   Future<String> _docPath() async {
