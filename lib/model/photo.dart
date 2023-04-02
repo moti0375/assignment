@@ -1,24 +1,10 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 part 'photo.g.dart';
+part 'photo.freezed.dart';
 
-@JsonSerializable()
-class Photo{
-  int albumId;
-  int id;
-  String title;
-  String url;
-  String thumbnailUrl;
+@freezed
+class Photo with _$Photo{
 
-  Photo({required this.albumId, required this.id, required this.title, required this.url, required this.thumbnailUrl});
-
-  /// Connect the generated [_$PersonFromJson] function to the `fromJson`
-  /// factory.
+  const factory Photo({required int albumId, required int id, required String title, required String url, required String thumbnailUrl}) = _Photo;
   factory Photo.fromJson(Map<String, dynamic> json) => _$PhotoFromJson(json);
-
-  /// Connect the generated [_$PersonToJson] function to the `toJson` method.
-  Map<String, dynamic> toJson() => _$PhotoToJson(this);
-
-  Photo cloneWithTitle({required String title}){
-    return Photo(albumId: this.albumId, id: this.id, title: title ?? this.title, url: this.url, thumbnailUrl: this.thumbnailUrl);
-}
 }

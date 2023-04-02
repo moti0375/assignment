@@ -28,7 +28,6 @@ class FilesLocalDataSource implements LocalDataSource {
 
   @override
   Future<void> removePhoto(Photo photo) async {
-
     List<Map<String, dynamic>> photos = await _readFromFile();
     Map<String, dynamic> ph = photos.firstWhere((element) => element['id'] == photo.id);
     int pIndex = photos.indexOf(ph);
@@ -65,7 +64,7 @@ class FilesLocalDataSource implements LocalDataSource {
     String path = await _docPath();
     File file = File("$path/$_fileName");
     String content = await file.readAsString();
-    List<Map<String, dynamic>> list = (json.decode(content) as List).map((e) => Map<String,dynamic>.of(e)).toList();
+    List<Map<String, dynamic>> list = (json.decode(content) as List).map((e) => Map<String, dynamic>.of(e)).toList();
     return list;
   }
 
