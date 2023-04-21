@@ -8,59 +8,38 @@ import 'package:moti_assignment/pages/home_page_cubit.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-
-  static Widget create(String title) {
-    return Consumer<AppRepository>(
-      builder: (_, repository, __) => BlocProvider<HomePageCubit>(
-        create: (_) => HomePageCubit(repository),
-        child: MyHomePage(title: title),
-      ),
-    );
-  }
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  HomePageCubit? _cubit;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_cubit == null) {
-      _cubit = Provider.of<HomePageCubit>(context);
-      _cubit?.fetchPhotos(refresh: false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          _cubit?.fetchPhotos(refresh: true);
+          context.read<HomePageCubit>().fetchPhotos(refresh: false);
           return;
         },
         child: Center(
           child: BlocBuilder<HomePageCubit, BaseBlocState<HomeBlocState>>(
-            buildWhen: (lastState, newState) =>
-                newState.whenOrNull(next: (data) => data.whenOrNull(photosLoaded: (data) => true)) != null,
-            builder: (context, baseState) => baseState.when(
-              init: () => SizedBox.shrink(),
-              loading: () => Center(child: CircularProgressIndicator()),
-              next: (pageState) => _processPageState(pageState),
-              error: (error) => Center(
-                child: Text("Something went wrong: ${error.toString()}"),
-              ),
-            ),
+            builder: (context, baseState) {
+              print("BlocBuilder: state: $baseState");
+              return baseState.when(
+                init: () {
+                  context.read<HomePageCubit>().fetchPhotos(refresh: false);
+                  return SizedBox.shrink();
+                },
+                loading: () => Center(child: CircularProgressIndicator()),
+                next: (pageState) => _processPageState(pageState),
+                error: (error) => Center(
+                  child: Text("Something went wrong: ${error.toString()}"),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -73,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
       photosLoaded: (photos) => ListView.builder(
         itemCount: photos.length,
         itemBuilder: (BuildContext context, int index) => Dismissible(
-          onDismissed: (direction)  => _cubit?.deletePhoto(photos[index]),
+          onDismissed: (direction) => context.read<HomePageCubit>().deletePhoto(photos[index]),
           key: UniqueKey(),
           child: InkWell(
             onTap: () => _showEditDialog(photos[index], context),
@@ -91,10 +70,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _showEditDialog(Photo photo, BuildContext context) async {
+  void _showEditDialog(Photo photo, BuildContext buildContext) async {
     TextEditingController controller = TextEditingController(text: photo.title);
     showDialog(
-        context: context,
+        context: buildContext,
         builder: (context) => AlertDialog(
               title: Text("Edit Photo"),
               content: TextField(
@@ -110,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 TextButton(
                     onPressed: () {
                       Photo p = photo.copyWith(title: controller.text);
-                      _cubit?.updatePhoto(p);
+                      buildContext.read<HomePageCubit>().updatePhoto(p);
                       Navigator.of(context).pop();
                       print("New photo: ${p.title}");
                     },
@@ -124,4 +103,12 @@ class _MyHomePageState extends State<MyHomePage> {
     Share.share("${photo.title}\n${photo.url}");
   }
 
+  static Widget create(String title) {
+    return Consumer<AppRepository>(
+      builder: (_, repository, __) => BlocProvider<HomePageCubit>(
+        create: (_) => HomePageCubit(repository),
+        child: MyHomePage(title: title),
+      ),
+    );
+  }
 }
